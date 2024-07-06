@@ -8,6 +8,7 @@ module fr.actia.teledist.evol {
     requires scribejava.core;
     requires okhttp3;
     requires unboundid.ldapsdk;
+    requires org.postgresql.jdbc;
 
     opens fr.actia.teledist.evol to javafx.fxml;
     exports fr.actia.teledist.evol;
