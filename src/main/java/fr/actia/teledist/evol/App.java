@@ -40,7 +40,7 @@ import com.google.gson.JsonObject;
 
 import fr.actia.teledist.evol.tools.DatabaseTool;
 import fr.actia.teledist.evol.treeviewer.ArtifactItem;
-import fr.actia.teledist.evol.treeviewer.CheckboxesUsines;
+import fr.actia.teledist.evol.treeviewer.CheckboxesCustom;
 
 
 /**

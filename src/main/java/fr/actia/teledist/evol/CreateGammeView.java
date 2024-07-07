@@ -13,7 +13,7 @@ import com.google.gson.JsonObject;
 
 import fr.actia.teledist.evol.tools.DatabaseTool;
 import fr.actia.teledist.evol.treeviewer.ArtifactItem;
-import fr.actia.teledist.evol.treeviewer.CheckboxesUsines;
+import fr.actia.teledist.evol.treeviewer.CheckboxesCustom;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -26,53 +26,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.cell.CheckBoxTreeCell;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.CheckBoxTreeItem;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import fr.actia.teledist.evol.tools.DatabaseTool;
-import fr.actia.teledist.evol.treeviewer.ArtifactItem;
-import fr.actia.teledist.evol.treeviewer.CheckboxesUsines;
 
 public class CreateGammeView {
 
@@ -85,7 +42,7 @@ public class CreateGammeView {
     CheckBoxTreeItem<ArtifactItem> currentItem = null;
     TreeView<ArtifactItem> treeView = new TreeView<>();
     private List<CheckBoxTreeItem> checkBoxes = new ArrayList<>();
-    private List<CheckboxesUsines> checkBoxesUsines = new ArrayList<>();
+    private List<CheckboxesCustom> checkBoxesUsines = new ArrayList<>();
     private TextField gammeField;
     private TextField versionField;
     private TextField vehicleField;
@@ -93,10 +50,8 @@ public class CreateGammeView {
 
     public SplitPane getView() {
        
-       
         treeView = new TreeView<>();
-        getArtifactsFromGitHub();
-
+        
         Button submitButton = new Button("Enregistrer");
         submitButton.setOnAction(event -> handleSubmit());
 
@@ -114,7 +69,7 @@ public class CreateGammeView {
         Label usinesLabel = new Label("Usines:");
         VBox usinesBox = new VBox(5);
         for (int i = 1; i <= 10; i++) {
-            CheckboxesUsines usineCheckBox = new CheckboxesUsines("Usine " + i, i);
+            CheckboxesCustom usineCheckBox = new CheckboxesCustom("Usine " + i, i);
             usinesBox.getChildren().add(usineCheckBox);
             checkBoxesUsines.add(usineCheckBox);
         }
@@ -131,8 +86,7 @@ public class CreateGammeView {
             "https://api.github.com/repos/Dorsk/teledist-evol/git/trees/main?recursive=1",
             "https://api.github.com/repos/Dorsk/react-tracerun/git/trees/main?recursive=1"
         );
- 
-        urlComboBox.setPromptText(urlComboBox.getItems().get(0).toString());
+        urlComboBox.setPromptText("Choisir un dépôt ");
         urlComboBox.setOnAction(e -> {
             try {
                 handleChangeCombo();
@@ -179,7 +133,7 @@ public class CreateGammeView {
     }
 
     private CheckBoxTreeItem<ArtifactItem> buildTree(JsonArray  nodes) {
-        CheckBoxTreeItem<ArtifactItem> rootItem = new CheckBoxTreeItem(new ArtifactItem("Repository" + GITHUB_URL, "tree", ""));
+        CheckBoxTreeItem<ArtifactItem> rootItem = new CheckBoxTreeItem(new ArtifactItem("Repository" + GITHUB_URL, "tree", "", ""));
         rootItem.setExpanded(true);
         Map<String, CheckBoxTreeItem<ArtifactItem>> pathMap = new HashMap<>();
 
@@ -200,7 +154,7 @@ public class CreateGammeView {
         for (String part : parts) {
             String fullPath = getFullPath(currentItem, part);
             currentItem = pathMap.computeIfAbsent(fullPath, k -> {
-                CheckBoxTreeItem<ArtifactItem> newItem = createTreeItem(part, type, url);
+                CheckBoxTreeItem<ArtifactItem> newItem = createTreeItem(part, type, url, path);
                 newItem.selectedProperty().addListener((obs, wasChecked, isNowChecked) -> {
                     if (isNowChecked) {
                         checkBoxes.add(newItem);
@@ -214,8 +168,8 @@ public class CreateGammeView {
         }
     }
 
-    private CheckBoxTreeItem<ArtifactItem> createTreeItem(String part, String type, String url) {
-        return new CheckBoxTreeItem(new ArtifactItem(part, type, url));
+    private CheckBoxTreeItem<ArtifactItem> createTreeItem(String part, String type, String url, String path) {
+        return new CheckBoxTreeItem(new ArtifactItem(part, type, url, path));
     }
 
     private String getFullPath(CheckBoxTreeItem<ArtifactItem> item, String part) {
@@ -252,19 +206,19 @@ public class CreateGammeView {
         System.out.println("version : " + versionField.getText());
         System.out.println("Vehicule : " + vehicleField.getText());
 
-        String insertGammeQuery = "INSERT INTO gamme (nom, vehicule, version) VALUES (?, ?, ?) RETURNING id";
+        String insertGammeQuery = "INSERT INTO gamme (nom, vehicule, version, repository) VALUES (?, ?, ?, ?) RETURNING id";
         String insertJoinGammeArtifactsQuery = "INSERT INTO joinGammeArtifacts (idgamme, idartifact) VALUES (?, ?) RETURNING id";
         String insertJoinGammeUsinesQuery = "INSERT INTO joingammeusines (idgamme, idusine) VALUES (?, ?) RETURNING id";
-        String insertArtifactsQuery = "INSERT INTO artifacts (nom, type, url) VALUES (?, ?, ?) RETURNING id";
+        String insertArtifactsQuery = "INSERT INTO artifacts (nom, type, url, path) VALUES (?, ?, ?, ?) RETURNING id";
         DatabaseTool dbTool = new DatabaseTool();
         int idGamme = 0;
-        idGamme = dbTool.executeInsertQuery(insertGammeQuery, gammeField.getText(), vehicleField.getText(), versionField.getText());
+        idGamme = dbTool.executeInsertQuery(insertGammeQuery, gammeField.getText(), vehicleField.getText(), versionField.getText(), urlComboBox.getValue());
        
         List<Integer> listIdArtifacts = new ArrayList<>();
         // Add artifacts
         for (ArtifactItem item : selectedItems) {
             System.out.println("Selected items: " + item.getName() + " | " + item.getType() + " | " + item.getUrl());
-            listIdArtifacts.add(dbTool.executeInsertQuery(insertArtifactsQuery, item.getName(), item.getType(), item.getUrl()));
+            listIdArtifacts.add(dbTool.executeInsertQuery(insertArtifactsQuery, item.getName(), item.getType(), item.getUrl(), item.getPath()));
         }
 
         // create join gamme + artifacts
@@ -273,7 +227,7 @@ public class CreateGammeView {
         }
         
         System.out.println("Liste des usines : ");
-        for (CheckboxesUsines usine : checkBoxesUsines) {
+        for (CheckboxesCustom usine : checkBoxesUsines) {
             if (usine.isSelected()) {
                 System.out.println(" - " + usine.getIdUsine() + " | " +  usine.getText());
                 dbTool.executeInsertQuery(insertJoinGammeUsinesQuery, idGamme, usine.getIdUsine());
@@ -310,7 +264,7 @@ public class CreateGammeView {
         gammeField.clear();
         versionField.clear();
         vehicleField.clear();
-        for (CheckboxesUsines usine : checkBoxesUsines) {
+        for (CheckboxesCustom usine : checkBoxesUsines) {
             usine.setSelected(false);
         }
     }

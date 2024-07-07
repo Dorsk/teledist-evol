@@ -6,11 +6,13 @@ package fr.actia.teledist.evol.treeviewer;
         private String name;
         private String type;
         private String url;
+        private String path;
 
-        public ArtifactItem(String name, String type, String url) {
+        public ArtifactItem(String name, String type, String url, String path) {
             this.name = name;
             this.type = type;
             this.url = url;
+            this.path = path;
         }
 
         public String getName() {
@@ -24,9 +26,12 @@ package fr.actia.teledist.evol.treeviewer;
         public String getUrl() {
             return url;
         }
+        public String getPath() {
+            return path;
+        }
 
         @Override
         public String toString() {
-            return name; // Display name in the TreeView
+            return name;
         }
     }
