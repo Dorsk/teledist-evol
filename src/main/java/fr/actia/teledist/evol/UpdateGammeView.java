@@ -17,16 +17,19 @@ import com.google.gson.JsonObject;
 import fr.actia.teledist.evol.models.ArtifactData;
 import fr.actia.teledist.evol.models.GammeData;
 import fr.actia.teledist.evol.models.UsineData;
+import fr.actia.teledist.evol.tools.ArtifactoryClient;
 import fr.actia.teledist.evol.tools.DatabaseTool;
 import fr.actia.teledist.evol.treeviewer.ArtifactItem;
 import fr.actia.teledist.evol.treeviewer.CheckboxesCustom;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -53,14 +56,14 @@ public class UpdateGammeView {
     private VBox usinesBox;
 
     @SuppressWarnings("unchecked")
-    public VBox getView() {
+    public SplitPane getView() {
         // init
         treeView = new TreeView<>();
         checkBoxesSavedArtifacts = new ArrayList<>();
         checkBoxesArtifacts = new ArrayList<>();
         checkBoxesUsines = new ArrayList<>();
 
-        // Left VBox for gamme details
+        // Left  gamme details
         VBox leftVBox = new VBox(10);
         leftVBox.setPadding(new Insets(10));
 
@@ -92,18 +95,15 @@ public class UpdateGammeView {
 
         Label versionLabelHead = new Label("Version");
         versionLabel = new TextField();
-        Label vehicleLabelHead = new Label("Version");
+        Label vehicleLabelHead = new Label("Véhicule");
         vehicleLabel = new TextField();
 
          // "Usines" Section
-         Label usinesLabel = new Label("Usines");
-         usinesBox = new VBox(10);
-         for (int i = 1; i <= 10; i++) {
-             CheckboxesCustom usineCheckBox = new CheckboxesCustom("Usine " + i, i);
-             usinesBox.getChildren().add(usineCheckBox);
-             checkBoxesUsines.add(usineCheckBox);
-        }
+        Label usinesLabel = new Label("Usines");
+        usinesBox = new VBox(10);
+
         Button updateButton = new Button("Update");
+        
 
         leftVBox.getChildren().addAll(gammeLabel, gammeComboBox, versionLabelHead, versionLabel,
             vehicleLabelHead, vehicleLabel, usinesLabel, usinesBox, updateButton);
@@ -114,6 +114,7 @@ public class UpdateGammeView {
         VBox.setVgrow(treeView, Priority.ALWAYS);
         Button supprButton = new Button("Supprimer artifacts de la gamme");
         centerVBox.getChildren().addAll(treeView, supprButton);
+        centerVBox.setAlignment(Pos.CENTER);
 
         // right
         VBox rightVBox = new VBox(20);
@@ -121,19 +122,18 @@ public class UpdateGammeView {
         VBox.setVgrow(treeViewRepository, Priority.ALWAYS);
         Button redoGammeButton = new Button("Refaire les artifacts de la gamme");
         rightVBox.getChildren().addAll(treeViewRepository,redoGammeButton);
+        rightVBox.setAlignment(Pos.CENTER);
         
-        // Main HBox to hold both VBoxes
-        HBox mainHBox = new HBox(20, leftVBox, centerVBox, rightVBox);
-        mainHBox.setPadding(new Insets(10));
-
-        // Wrap in a VBox to return as the main view
-        VBox mainVBox = new VBox(mainHBox);
-
         // init gammes
         getAllGamme();
         handleArtifacts();
         
-        return mainVBox;
+        // Main HBox to hold both VBoxes
+        SplitPane splitPane = new SplitPane();
+        splitPane.getItems().addAll(leftVBox, centerVBox, rightVBox);
+        splitPane.setDividerPositions(0.2f,0.4f,0.3f);
+
+        return splitPane;
     }
 
     private void handleArtifacts() {
@@ -141,7 +141,7 @@ public class UpdateGammeView {
     }
 
     public void getAllGamme() {
-         String insertGammeQuery = "SELECT id, nom, vehicule, version, repository from gamme";
+        String insertGammeQuery = "SELECT id, nom, vehicule, version, repository from gamme ORDER BY nom ASC";
         DatabaseTool dbTool = new DatabaseTool();
         
         ResultSet res = dbTool.executeSelectQuery(insertGammeQuery);
@@ -211,7 +211,6 @@ public class UpdateGammeView {
         // Creation du treeviewer
         usinesBox.getChildren().clear();
         for (int i = 1; i <= 10; i++) {
-            
             CheckboxesCustom usineCheckBox = new CheckboxesCustom(allUsinesDataMap.get(i).getNom(), allUsinesDataMap.get(i).getId());
             usinesBox.getChildren().add(usineCheckBox);
             checkBoxesUsines.add(usineCheckBox);

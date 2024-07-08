@@ -1,20 +1,23 @@
 package fr.actia.teledist.evol.login;
 
+import fr.actia.teledist.evol.CreateGammeView;
+import fr.actia.teledist.evol.UpdateGammeView;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class LoginView extends Application {
+public class LoginView {
 
-    @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("LDAP Login");
+    public GridPane getView(BorderPane mainLayout) {
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -36,16 +39,19 @@ public class LoginView extends Application {
         loginButton.setOnAction(event -> {
             String username = userTextField.getText();
             String password = pwBox.getText();
-            if (authenticate(username, password)) {
-                showAlert(Alert.AlertType.INFORMATION, "Login Successful", "Welcome, " + username + "!");
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid credentials.");
-            }
+            //if (authenticate(username, password)) {
+            //     showAlert(Alert.AlertType.INFORMATION, "Login Successful", "Welcome, " + username + "!");
+                CreateGammeView updateGammeView = new CreateGammeView();
+                mainLayout.setCenter(updateGammeView.getView());
+            //} else {
+            //     showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid credentials.");
+                // On passe a la suite quand meme tnat que le lDAP n'est pas actif
+            //     CreateGammeView updateGammeView = new CreateGammeView();
+            //    mainLayout.setCenter(updateGammeView.getView());
+            // }
         });
-
-        Scene scene = new Scene(grid, 300, 200);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        grid.setAlignment(Pos.CENTER);
+        return grid;
     }
 
     private boolean authenticate(String username, String password) {

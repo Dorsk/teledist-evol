@@ -1,5 +1,6 @@
 package fr.actia.teledist.evol;
 
+import fr.actia.teledist.evol.login.LoginView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -16,6 +17,7 @@ import javafx.stage.Stage;
 public class App extends Application {
 
     private BorderPane mainLayout;
+    private LoginView loginView;
 
     public static void main(String[] args) {
         launch(args);
@@ -39,13 +41,18 @@ public class App extends Application {
         mainLayout.setTop(menuBar);
 
         // Show initial view
-        showCreateGammeView();
+        showLoginView();
 
-        Scene scene = new Scene(mainLayout, 900, 600);
+        Scene scene = new Scene(mainLayout, 1300, 800);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Teledist Evolution");
         primaryStage.show();
 
+    }
+
+    private void showLoginView(){
+        loginView = new LoginView();
+        mainLayout.setCenter(loginView.getView(mainLayout));
     }
 
     private void showUpdateGammeView(){

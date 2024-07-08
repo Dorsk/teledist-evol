@@ -1,6 +1,8 @@
 package fr.actia.teledist.evol;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +13,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import fr.actia.teledist.evol.models.UsineData;
+import fr.actia.teledist.evol.tools.ArtifactoryClient;
 import fr.actia.teledist.evol.tools.DatabaseTool;
 import fr.actia.teledist.evol.treeviewer.ArtifactItem;
 import fr.actia.teledist.evol.treeviewer.CheckboxesCustom;
@@ -67,9 +71,20 @@ public class CreateGammeView {
 
         // "Usines" Section
         Label usinesLabel = new Label("Usines:");
+        String selectAllUsinesQuery = "SELECT id, nom, pays from usines";
+        DatabaseTool dbTool = new DatabaseTool();
+        ResultSet res = dbTool.executeSelectQuery(selectAllUsinesQuery);
+        Map<Integer, UsineData> allUsinesDataMap = new HashMap<>();
+        try {
+            while (res.next()) {
+                allUsinesDataMap.put(res.getInt("id"), new UsineData(res.getInt("id"), res.getString("nom"), res.getString("pays")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         VBox usinesBox = new VBox(5);
         for (int i = 1; i <= 10; i++) {
-            CheckboxesCustom usineCheckBox = new CheckboxesCustom("Usine " + i, i);
+            CheckboxesCustom usineCheckBox = new CheckboxesCustom(allUsinesDataMap.get(i).getNom(), allUsinesDataMap.get(i).getId());
             usinesBox.getChildren().add(usineCheckBox);
             checkBoxesUsines.add(usineCheckBox);
         }
@@ -82,7 +97,7 @@ public class CreateGammeView {
         // rendre dynamique
         urlComboBox = new ComboBox();
         urlComboBox.getItems().addAll(
-            "https://api.github.com/repos/Dorsk/react-tracerun/git/trees/main?recursive=1",
+            "https://api.github.com/repos/Dorsk/conf-vehicles/git/trees/main?recursive=1",
             "https://api.github.com/repos/Dorsk/teledist-evol/git/trees/main?recursive=1",
             "https://api.github.com/repos/Dorsk/react-tracerun/git/trees/main?recursive=1"
         );

@@ -5,7 +5,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 
 public class LDAPconnect {
 
-    private static final String LDAP_HOST = "ldap.example.com";
+    private static final String LDAP_HOST = "hostAChanger";
     private static final int LDAP_PORT = 389;
     private static final String BASE_DN = "dc=actia,dc=local";
 
