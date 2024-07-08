@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.actia.teledist.evol</groupId>
     <artifactId>teledist-evol</artifactId>
-    <version>1</version>
+    <version>1.0.0</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
@@ -22,7 +22,6 @@
             <version>7.0.1</version>
             <scope>provided</scope>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -52,20 +51,7 @@
              <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
-        <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>github-api</artifactId>
-            <version>1.323</version>
-            <scope>provided</scope>
-        </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.apache.maven.doxia/doxia-site-renderer -->
-        <dependency>
-            <groupId>org.apache.maven.doxia</groupId>
-            <artifactId>doxia-site-renderer</artifactId>
-            <version>2.0.0-M19</version>
-             <scope>provided</scope>
-        </dependency>
+       
         <dependency>
             <groupId>javax.json</groupId>
             <artifactId>javax.json-api</artifactId>

@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 
 import fr.actia.teledist.evol.models.ArtifactData;
 import fr.actia.teledist.evol.models.GammeData;
+import fr.actia.teledist.evol.models.UsineData;
 import fr.actia.teledist.evol.tools.DatabaseTool;
 import fr.actia.teledist.evol.treeviewer.ArtifactItem;
 import fr.actia.teledist.evol.treeviewer.CheckboxesCustom;
@@ -39,18 +40,25 @@ public class UpdateGammeView {
     private ComboBox gammeComboBox;
     private Map<Integer, String> gammes;
     private Map<Integer, GammeData> AllGammes;
-    CheckBoxTreeItem<ArtifactItem> currentItem = null;
-    TreeView<ArtifactItem> treeView = new TreeView<>();
-    TreeView<ArtifactItem> treeViewRepository = new TreeView<>();
-    private List<CheckBoxTreeItem> checkBoxes = new ArrayList<>();
+    private Map<Integer, UsineData> UsinesPerGammme;
+    private CheckBoxTreeItem<ArtifactItem> currentItem = null;
+    private TreeView<ArtifactItem> treeView = new TreeView<>();
+    private TreeView<ArtifactItem> treeViewRepository = new TreeView<>();
+    private List<CheckBoxTreeItem> checkBoxesSavedArtifacts = new ArrayList<>();
+    private List<CheckBoxTreeItem> checkBoxesArtifacts = new ArrayList<>();
     private TextField versionLabel;
     private TextField vehicleLabel;
+    private Integer igGammeFound;
+    private List<CheckboxesCustom> checkBoxesUsines;
+    private VBox usinesBox;
 
     @SuppressWarnings("unchecked")
     public VBox getView() {
         // init
         treeView = new TreeView<>();
-        checkBoxes = new ArrayList<>();
+        checkBoxesSavedArtifacts = new ArrayList<>();
+        checkBoxesArtifacts = new ArrayList<>();
+        checkBoxesUsines = new ArrayList<>();
 
         // Left VBox for gamme details
         VBox leftVBox = new VBox(10);
@@ -60,7 +68,7 @@ public class UpdateGammeView {
         gammeComboBox = new ComboBox();
         gammeComboBox.setOnAction(e -> {
             try {
-                int igGammeFound=0;
+                
                 for (Entry<Integer, String> entry : gammes.entrySet()) {
                     if (entry.getValue().equals(gammeComboBox.getValue())) {
                         igGammeFound = entry.getKey();
@@ -74,6 +82,8 @@ public class UpdateGammeView {
                 // update labels
                 vehicleLabel.setText(AllGammes.get(igGammeFound).getVehicule());
                 versionLabel.setText(AllGammes.get(igGammeFound).getVersion());
+                //update Usines
+                getUsinesByIdGamme(igGammeFound, gammes.get(igGammeFound));
 
             } catch (Exception e1) {
                 e1.printStackTrace();
@@ -85,15 +95,24 @@ public class UpdateGammeView {
         Label vehicleLabelHead = new Label("Version");
         vehicleLabel = new TextField();
 
+         // "Usines" Section
+         Label usinesLabel = new Label("Usines");
+         usinesBox = new VBox(10);
+         for (int i = 1; i <= 10; i++) {
+             CheckboxesCustom usineCheckBox = new CheckboxesCustom("Usine " + i, i);
+             usinesBox.getChildren().add(usineCheckBox);
+             checkBoxesUsines.add(usineCheckBox);
+        }
         Button updateButton = new Button("Update");
 
-        leftVBox.getChildren().addAll(gammeLabel, gammeComboBox, versionLabelHead, versionLabel, vehicleLabelHead, vehicleLabel, updateButton);
+        leftVBox.getChildren().addAll(gammeLabel, gammeComboBox, versionLabelHead, versionLabel,
+            vehicleLabelHead, vehicleLabel, usinesLabel, usinesBox, updateButton);
 
         // Center VBox 
         VBox centerVBox = new VBox(20);
         centerVBox.setPadding(new Insets(10));
         VBox.setVgrow(treeView, Priority.ALWAYS);
-        Button supprButton = new Button("Update artifacts de la gamme");
+        Button supprButton = new Button("Supprimer artifacts de la gamme");
         centerVBox.getChildren().addAll(treeView, supprButton);
 
         // right
@@ -142,6 +161,67 @@ public class UpdateGammeView {
         }
     }
 
+    public void getUsinesByIdGamme(int idgamme, String nomGamme) {
+        String insertGammeQuery = "SELECT idusine from joinGammeUsines where idgamme = " + idgamme;
+        String selectAllUsinesQuery = "SELECT id, nom, pays from usines";
+        String selectUsinessQuery = "SELECT id, nom, pays from usines where id IN (";
+        DatabaseTool dbTool = new DatabaseTool();
+       
+        ResultSet res = dbTool.executeSelectQuery(insertGammeQuery);
+        String idUsinesList="";
+        int countSeparator = 0;
+        try {
+            while (res.next()) {
+                if (countSeparator==0){
+                    idUsinesList = idUsinesList + Integer.toString(res.getInt("idusine"));
+                    countSeparator=1;
+                } else {
+                    idUsinesList = idUsinesList + "," + Integer.toString(res.getInt("idusine"));
+                }
+            }
+        } catch (SQLException e) {
+           // TODO Auto-generated catch block
+           e.printStackTrace();
+        }
+
+        res = dbTool.executeSelectQuery(selectAllUsinesQuery);
+        Map<Integer, UsineData> allUsinesDataMap = new HashMap<>();
+        try {
+            while (res.next()) {
+                allUsinesDataMap.put(res.getInt("id"), new UsineData(res.getInt("id"), res.getString("nom"), res.getString("pays")));
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        selectUsinessQuery = selectUsinessQuery + idUsinesList + ")";
+        System.err.println(selectUsinessQuery);
+        res = dbTool.executeSelectQuery(selectUsinessQuery);
+        Map<Integer, UsineData> selectedUsinesDataMap = new HashMap<>();
+        try {
+            while (res.next()) {
+                selectedUsinesDataMap.put(res.getInt("id"), new UsineData(res.getInt("id"), res.getString("nom"), res.getString("pays")));
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        // Creation du treeviewer
+        usinesBox.getChildren().clear();
+        for (int i = 1; i <= 10; i++) {
+            
+            CheckboxesCustom usineCheckBox = new CheckboxesCustom(allUsinesDataMap.get(i).getNom(), allUsinesDataMap.get(i).getId());
+            usinesBox.getChildren().add(usineCheckBox);
+            checkBoxesUsines.add(usineCheckBox);
+            if(selectedUsinesDataMap.containsKey(i)){
+                usineCheckBox.setSelected(true);
+            }
+       }
+       
+   }
+
     public void getArtifactsByIdGamme(int idgamme, String nomGamme) {
         String insertGammeQuery = "SELECT idartifact from joinGammeArtifacts where idgamme = " + idgamme;
         String selectArtifactsQuery = "SELECT id, nom, url, version, type, path from artifacts where id IN (";
@@ -165,7 +245,6 @@ public class UpdateGammeView {
         }
 
         selectArtifactsQuery = selectArtifactsQuery + idArtefactsList + ")";
-        System.err.println(selectArtifactsQuery);
         res = dbTool.executeSelectQuery(selectArtifactsQuery);
         List<ArtifactData> artifactDataList = new ArrayList<>();
         try {
@@ -212,14 +291,22 @@ public class UpdateGammeView {
                 // Toujours expand les artifacts déja selectionné dans la database
                 if (isArtifactFromDB){
                     newItem.setExpanded(true);
+                    newItem.selectedProperty().addListener((obs, wasChecked, isNowChecked) -> {
+                        if (isNowChecked) {
+                            checkBoxesSavedArtifacts.add(newItem);
+                        } else {
+                            checkBoxesSavedArtifacts.remove(newItem);
+                        }
+                    });
+                } else {
+                    newItem.selectedProperty().addListener((obs, wasChecked, isNowChecked) -> {
+                        if (isNowChecked) {
+                            checkBoxesArtifacts.add(newItem);
+                        } else {
+                            checkBoxesArtifacts.remove(newItem);
+                        }
+                    });
                 }
-                newItem.selectedProperty().addListener((obs, wasChecked, isNowChecked) -> {
-                    if (isNowChecked) {
-                        checkBoxes.add(newItem);
-                    } else {
-                        checkBoxes.remove(newItem);
-                    }
-                });
                 currentItem.getChildren().add(newItem);
                 return newItem;
             });
@@ -282,5 +369,6 @@ public class UpdateGammeView {
         }
         return rootItem;
     }
+
 
 }

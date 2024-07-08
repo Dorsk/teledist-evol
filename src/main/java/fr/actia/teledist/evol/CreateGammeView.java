@@ -200,12 +200,7 @@ public class CreateGammeView {
             }
         }
        
-
-        // ToDo : envoyer dans la base de données
-        System.out.println("Gamme : " + gammeField.getText());
-        System.out.println("version : " + versionField.getText());
-        System.out.println("Vehicule : " + vehicleField.getText());
-
+        // enregistrement dnas la base de données
         String insertGammeQuery = "INSERT INTO gamme (nom, vehicule, version, repository) VALUES (?, ?, ?, ?) RETURNING id";
         String insertJoinGammeArtifactsQuery = "INSERT INTO joinGammeArtifacts (idgamme, idartifact) VALUES (?, ?) RETURNING id";
         String insertJoinGammeUsinesQuery = "INSERT INTO joingammeusines (idgamme, idusine) VALUES (?, ?) RETURNING id";
@@ -225,7 +220,7 @@ public class CreateGammeView {
         for (int idArtifact : listIdArtifacts) {
             dbTool.executeInsertQuery(insertJoinGammeArtifactsQuery, idGamme, idArtifact);
         }
-        
+        // create join gamme + usines
         System.out.println("Liste des usines : ");
         for (CheckboxesCustom usine : checkBoxesUsines) {
             if (usine.isSelected()) {
