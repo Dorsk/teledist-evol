@@ -1,4 +1,4 @@
-package fr.actia.teledist.evol;
+package fr.actia.teledist.evol.views.gammes;
 
 import java.io.IOException;
 import java.sql.ResultSet;

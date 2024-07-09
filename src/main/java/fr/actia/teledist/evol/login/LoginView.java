@@ -1,7 +1,7 @@
 package fr.actia.teledist.evol.login;
 
-import fr.actia.teledist.evol.CreateGammeView;
-import fr.actia.teledist.evol.UpdateGammeView;
+import fr.actia.teledist.evol.views.gammes.CreateGammeView;
+import fr.actia.teledist.evol.views.gammes.UpdateGammeView;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;

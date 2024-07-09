@@ -1,6 +1,9 @@
 package fr.actia.teledist.evol;
 
 import fr.actia.teledist.evol.login.LoginView;
+import fr.actia.teledist.evol.views.download.DownloadGammeView;
+import fr.actia.teledist.evol.views.gammes.CreateGammeView;
+import fr.actia.teledist.evol.views.gammes.UpdateGammeView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -18,6 +21,7 @@ public class App extends Application {
 
     private BorderPane mainLayout;
     private LoginView loginView;
+    private Stage primaryStage;
 
     public static void main(String[] args) {
         launch(args);
@@ -26,6 +30,7 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage)  {
 
+        this.primaryStage = primaryStage;
          // Initialize main layout
         mainLayout = new BorderPane();
         MenuBar menuBar = new MenuBar();
@@ -34,10 +39,15 @@ public class App extends Application {
         createGammeMenuItem.setOnAction(e -> showCreateGammeView());
         MenuItem updateGammeMenuItem = new MenuItem("Update gamme");
         updateGammeMenuItem.setOnAction(e -> showUpdateGammeView());
-
         gammeMenu.getItems().addAll(createGammeMenuItem, updateGammeMenuItem);
 
+        Menu downloadGammeMenu = new Menu("Download");
+        MenuItem downloadGammeMenuItem = new MenuItem("Download gamme");
+        downloadGammeMenuItem.setOnAction(e -> showDownloadGammeView());
+        downloadGammeMenu.getItems().addAll(downloadGammeMenuItem);
+
         menuBar.getMenus().add(gammeMenu);
+        menuBar.getMenus().add(downloadGammeMenu);
         mainLayout.setTop(menuBar);
 
         // Show initial view
@@ -65,4 +75,8 @@ public class App extends Application {
         mainLayout.setCenter(updateGammeView.getView());
     }
 
+    private void showDownloadGammeView() {
+        DownloadGammeView downloadGammeView = new DownloadGammeView();
+        mainLayout.setCenter(downloadGammeView.getView(this.primaryStage));
+    }
 }
