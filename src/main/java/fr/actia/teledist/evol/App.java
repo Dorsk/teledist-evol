@@ -4,6 +4,7 @@ import fr.actia.teledist.evol.login.LoginView;
 import fr.actia.teledist.evol.views.download.DownloadGammeView;
 import fr.actia.teledist.evol.views.gammes.CreateGammeView;
 import fr.actia.teledist.evol.views.gammes.UpdateGammeView;
+import fr.actia.teledist.evol.views.usines.UsinesPreviewView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -46,8 +47,14 @@ public class App extends Application {
         downloadGammeMenuItem.setOnAction(e -> showDownloadGammeView());
         downloadGammeMenu.getItems().addAll(downloadGammeMenuItem);
 
+        Menu usineMenu = new Menu("Usines");
+        MenuItem usineMenuItem = new MenuItem("Preview");
+        usineMenuItem.setOnAction(e -> showUsinesPreviewView());
+        usineMenu.getItems().addAll(usineMenuItem);
+
         menuBar.getMenus().add(gammeMenu);
         menuBar.getMenus().add(downloadGammeMenu);
+        menuBar.getMenus().add(usineMenu);
         mainLayout.setTop(menuBar);
 
         // Show initial view
@@ -79,4 +86,9 @@ public class App extends Application {
         DownloadGammeView downloadGammeView = new DownloadGammeView();
         mainLayout.setCenter(downloadGammeView.getView(this.primaryStage));
     }
+
+    private void showUsinesPreviewView() {
+        UsinesPreviewView usinesPreviewView = new UsinesPreviewView();
+        mainLayout.setCenter(usinesPreviewView.getView(this.primaryStage));
+    }    
 }

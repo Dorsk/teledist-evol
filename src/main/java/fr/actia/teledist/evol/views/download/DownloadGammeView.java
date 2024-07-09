@@ -136,7 +136,7 @@ public class DownloadGammeView {
                 }
             }
             // IHM : export fini
-            showSuccessPopup();
+            showSuccessPopup(artifactDataList.size());
         });
         
 
@@ -348,12 +348,16 @@ public class DownloadGammeView {
     }
 
     
-    private void showSuccessPopup() {
+    private void showSuccessPopup(int artifactsSize) {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Confirmation");
 
-        Label successLabel = new Label("Export de la gamme " + igGammeFound + "réussi !");
+        Label successLabel = new Label("Export de la gamme réussi ! \n"
+        + "\n Gamme    : " + AllGammes.get(igGammeFound).getNom()
+        + "\n Version    : " + AllGammes.get(igGammeFound).getVersion()
+        + "\n Véhicule   : " + AllGammes.get(igGammeFound).getVehicule()
+        + "\n Artifacts   : " + artifactsSize);
         Button okButton = new Button("OK");
         okButton.setOnAction(e -> popupStage.close());
 

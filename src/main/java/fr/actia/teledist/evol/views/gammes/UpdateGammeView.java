@@ -111,17 +111,19 @@ public class UpdateGammeView {
         // Center VBox 
         VBox centerVBox = new VBox(20);
         centerVBox.setPadding(new Insets(10));
+        Label treeviewerLabel = new Label("Artifacts de la gamme");
         VBox.setVgrow(treeView, Priority.ALWAYS);
         Button supprButton = new Button("Supprimer artifacts de la gamme");
-        centerVBox.getChildren().addAll(treeView, supprButton);
+        centerVBox.getChildren().addAll(treeviewerLabel, treeView, supprButton);
         centerVBox.setAlignment(Pos.CENTER);
 
         // right
         VBox rightVBox = new VBox(20);
         rightVBox.setPadding(new Insets(10));
+        Label treeviewerOriginLabel = new Label("Dépot utilisé pour cette gamme");
         VBox.setVgrow(treeViewRepository, Priority.ALWAYS);
         Button redoGammeButton = new Button("Refaire les artifacts de la gamme");
-        rightVBox.getChildren().addAll(treeViewRepository,redoGammeButton);
+        rightVBox.getChildren().addAll(treeviewerOriginLabel, treeViewRepository,redoGammeButton);
         rightVBox.setAlignment(Pos.CENTER);
         
         // init gammes
