@@ -37,10 +37,8 @@ import javafx.stage.Stage;
 
 public class CreateGammeView {
 
-    private final String GITHUB_TOKEN = "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"; // Replace with your GitHub personal access token
     private String GITHUB_URL = "https://api.github.com/repos/Dorsk/react-tracerun/git/trees/main?recursive=1"; // Replace with your GitHub API URL for artifacts
     private static final String GITHUB_CLIENT_ID = "Dorsk"; // Replace with your GitHub Client ID
-    private static final String GITHUB_CLIENT_SECRET = "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"; // Replace with your GitHub Client Secret
     private static final String GITHUB_REDIRECT_URI = "http://localhost:8080"; // Replace with your redirect URI
     
     CheckBoxTreeItem<ArtifactItem> currentItem = null;
