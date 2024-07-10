@@ -18,14 +18,17 @@ import com.google.gson.JsonObject;
 public class ArtifactoryClient {
     
     private OkHttpClient client;
+    private final String GITHUB_TOKEN = "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"; // Replace with your GitHub personal access token
+    
 
     public ArtifactoryClient() {
         this.client = new OkHttpClient();
     }
 
     public String getArtifacts(String GITHUB_URL) throws IOException {
-        Request request = new Request.Builder()
-            .url(GITHUB_URL)
+        Request request = new Request.Builder().url(GITHUB_URL)
+            .header("Authorization", "Bearer " + GITHUB_TOKEN)
+            .header("content-type", "application/json")
             .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -35,7 +38,10 @@ public class ArtifactoryClient {
     }
 
     public void downloadArtifact(String url, String filePath) throws IOException {
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder().url(url)
+            .header("Authorization", "Bearer " + GITHUB_TOKEN)
+            .header("content-type", "application/json")
+            .build();
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);

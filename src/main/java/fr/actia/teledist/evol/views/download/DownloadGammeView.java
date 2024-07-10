@@ -126,17 +126,30 @@ public class DownloadGammeView {
         Button updateButton = new Button("Download Gamme");
         updateButton.setOnAction(e -> {
             ArtifactoryClient client = new ArtifactoryClient();
-            for (ArtifactData artifact : this.artifactDataList) {
-                
-                try {
-                    client.downloadArtifact(artifact.getUrl(), selectedFolder.getAbsolutePath()+ File.separator + artifact.getNom());
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
+            boolean hasError = false;
+
+            if(selectedFolder == null || selectedFolder.getAbsolutePath() == null || selectedFolder.getAbsolutePath().isEmpty())
+            {
+                hasError=true;
+                showErrorPopup();
             }
-            // IHM : export fini
-            showSuccessPopup(artifactDataList.size());
+            if(this.artifactDataList == null || this.artifactDataList.isEmpty())
+            {
+                hasError=true;
+                showErrorPopup();
+            }
+            if(!hasError){
+                for (ArtifactData artifact : this.artifactDataList) {
+                    
+                    try {
+                        client.downloadArtifact(artifact.getUrl(), selectedFolder.getAbsolutePath()+ File.separator + artifact.getNom());
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                }
+                showSuccessPopup(artifactDataList.size()); // IHM : export fini
+            }
         });
         
 
@@ -150,7 +163,6 @@ public class DownloadGammeView {
         centerVBox.getChildren().addAll(treeView);
         centerVBox.setAlignment(Pos.CENTER);
 
-        
         // init gammes
         getAllGamme();
         handleArtifacts();
@@ -189,51 +201,13 @@ public class DownloadGammeView {
     }
 
     public void getUsinesByIdGamme(int idgamme, String nomGamme) {
-        String insertGammeQuery = "SELECT idusine from joinGammeUsines where idgamme = " + idgamme;
-        String selectAllUsinesQuery = "SELECT id, nom, pays from usines";
-        String selectUsinessQuery = "SELECT id, nom, pays from usines where id IN (";
-        DatabaseTool dbTool = new DatabaseTool();
+        
        
-        ResultSet res = dbTool.executeSelectQuery(insertGammeQuery);
-        String idUsinesList="";
-        int countSeparator = 0;
-        try {
-            while (res.next()) {
-                if (countSeparator==0){
-                    idUsinesList = idUsinesList + Integer.toString(res.getInt("idusine"));
-                    countSeparator=1;
-                } else {
-                    idUsinesList = idUsinesList + "," + Integer.toString(res.getInt("idusine"));
-                }
-            }
-        } catch (SQLException e) {
-           // TODO Auto-generated catch block
-           e.printStackTrace();
-        }
-
-        res = dbTool.executeSelectQuery(selectAllUsinesQuery);
+        DatabaseTool dbTool = new DatabaseTool();
         Map<Integer, UsineData> allUsinesDataMap = new HashMap<>();
-        try {
-            while (res.next()) {
-                allUsinesDataMap.put(res.getInt("id"), new UsineData(res.getInt("id"), res.getString("nom"), res.getString("pays")));
-            }
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
-        selectUsinessQuery = selectUsinessQuery + idUsinesList + ")";
-        System.err.println(selectUsinessQuery);
-        res = dbTool.executeSelectQuery(selectUsinessQuery);
-        Map<Integer, UsineData> selectedUsinesDataMap = new HashMap<>();
-        try {
-            while (res.next()) {
-                selectedUsinesDataMap.put(res.getInt("id"), new UsineData(res.getInt("id"), res.getString("nom"), res.getString("pays")));
-            }
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        allUsinesDataMap = dbTool.getAllUsines();
+        Map<Integer, UsineData> selectedUsinesDataMap = dbTool.getAllusinesByidGamme(idgamme);
 
         // Creation du treeviewer
         usinesBox.getChildren().clear();
@@ -358,6 +332,24 @@ public class DownloadGammeView {
         + "\n Version    : " + AllGammes.get(igGammeFound).getVersion()
         + "\n Véhicule   : " + AllGammes.get(igGammeFound).getVehicule()
         + "\n Artifacts   : " + artifactsSize);
+        Button okButton = new Button("OK");
+        okButton.setOnAction(e -> popupStage.close());
+
+        VBox popupLayout = new VBox(10, successLabel, okButton);
+        popupLayout.setPadding(new Insets(10));
+        popupLayout.setAlignment(Pos.CENTER);
+
+        Scene popupScene = new Scene(popupLayout, 300, 200);
+        popupStage.setScene(popupScene);
+        popupStage.showAndWait();
+    }
+
+    private void showErrorPopup() {
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Confirmation");
+
+        Label successLabel = new Label("Erreur d'export !");
         Button okButton = new Button("OK");
         okButton.setOnAction(e -> popupStage.close());
 

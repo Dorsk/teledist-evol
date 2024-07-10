@@ -5,6 +5,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import fr.actia.teledist.evol.models.GammeData;
+import fr.actia.teledist.evol.models.UsineData;
 
 public class DatabaseTool {
 
@@ -126,6 +133,99 @@ public class DatabaseTool {
         System.out.println("Rows affected by delete: " + rowsAffected);
 
         dbUtility.closeConnection();
+    }
+
+    public Map<Integer, List<Integer>> getAllJoinGammeUsines() {
+        
+        Map<Integer, List<Integer>> allGammeByUsine = new HashMap<>();
+        String selectGammeQuery = "SELECT idgamme, idusine from joingammeusines";
+        ResultSet res = this.executeSelectQuery(selectGammeQuery);
+        try {
+            while (res.next()) {
+                if (allGammeByUsine.get(res.getInt("idusine"))== null){
+                    List <Integer> listidGamme= new ArrayList<Integer>();
+                    listidGamme.add(res.getInt("idgamme"));
+                    allGammeByUsine.put(res.getInt("idusine"), listidGamme);
+                } else {
+                    List <Integer> listidGamme= allGammeByUsine.get(res.getInt("idusine"));
+                    listidGamme.add(res.getInt("idgamme"));
+                    allGammeByUsine.put(res.getInt("idusine"), listidGamme);
+                }
+                //allGammeByUsine.put(res.getInt("idusine"), res.getInt("idgamme"));
+            }
+        } catch (SQLException e) {
+           e.printStackTrace();
+        }
+        return allGammeByUsine;
+    }
+
+    public Map<Integer, UsineData> getAllUsines() {
+        Map<Integer, UsineData> allUsinesDataMap = new HashMap<>();
+
+        String selectAllUsinesQuery = "SELECT id, nom, pays from usines";
+        ResultSet res = this.executeSelectQuery(selectAllUsinesQuery);
+        try {
+            while (res.next()) {
+                allUsinesDataMap.put(res.getInt("id"), new UsineData(res.getInt("id"), res.getString("nom"), res.getString("pays")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return allUsinesDataMap;
+    }
+
+    public Map<Integer, GammeData> getAllGammes() {
+        Map<Integer, GammeData> allGammesDataMap = new HashMap<>();
+        String insertGammeQuery = "SELECT id, nom, vehicule, version, repository from gamme";
+        // All gammes
+        ResultSet res = this.executeSelectQuery(insertGammeQuery);
+        try {
+            while (res.next()) {
+                GammeData gammeData = new GammeData(res.getInt("id"), res.getString("nom"),
+                res.getString("vehicule"), res.getString("version"), res.getString("repository"));
+                allGammesDataMap.put(res.getInt("id"), gammeData);
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return allGammesDataMap;
+    }
+
+    public Map<Integer, UsineData> getAllusinesByidGamme(int idgamme) {
+
+        String insertGammeQuery = "SELECT idusine from joinGammeUsines where idgamme = " + idgamme;
+        String selectUsinessQuery = "SELECT id, nom, pays from usines where id IN (";
+        String idUsinesList="";
+        int countSeparator = 0;
+
+        ResultSet res = this.executeSelectQuery(insertGammeQuery);
+        try {
+            while (res.next()) {
+                if (countSeparator==0){
+                    idUsinesList = idUsinesList + Integer.toString(res.getInt("idusine"));
+                    countSeparator=1;
+                } else {
+                    idUsinesList = idUsinesList + "," + Integer.toString(res.getInt("idusine"));
+                }
+            }
+        } catch (SQLException e) {
+           e.printStackTrace();
+        }
+
+        selectUsinessQuery = selectUsinessQuery + idUsinesList + ")";
+        System.err.println(selectUsinessQuery);
+        res = this.executeSelectQuery(selectUsinessQuery);
+        Map<Integer, UsineData> selectedUsinesDataMap = new HashMap<>();
+        try {
+            while (res.next()) {
+                selectedUsinesDataMap.put(res.getInt("id"), new UsineData(res.getInt("id"), res.getString("nom"), res.getString("pays")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return selectedUsinesDataMap;
     }
 
     
